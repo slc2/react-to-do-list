@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./styles.css";
 import { NewTodoForm } from "./NewTodoForm";
 import { TodoList } from "./TodoList";
 import { ToDoItem } from "./ToDoItem";
 
-
+const ItemsIndex = "ITEMS";
 
 export default function App(): React.JSX.Element {
-  const [todos, setTodos] = useState<ToDoItem[]>([]);
+  // replaced the following to use local storage to initialize todos
+  // const [todos, setTodos] = useState<ToDoItem[]>([]);
 
+  // hooks at the top of the component
+  const [todos, setTodos] = useState<ToDoItem[]>(() => {
+    const localValue = localStorage.getItem(ItemsIndex);
+    if (localValue == null) return [];
+    return JSON.parse(localValue);
+  });
+
+  useEffect(() => {
+    localStorage.setItem(ItemsIndex, JSON.stringify(todos)), [todos]; // any time anything in todos changes, save it to local storage
+  });
+
+  // helper functions
   function addTodo(title: string) {
     setTodos((currentTodos) => {
       return [
@@ -38,12 +51,13 @@ export default function App(): React.JSX.Element {
 
   // console.log(todos);
 
+  // the returned jsx
   return (
     <>
-      <NewTodoForm onSubmit={addTodo}/>
+      <NewTodoForm onSubmit={addTodo} />
 
       <h1 className="header">Todo list</h1>
-      <TodoList todos={todos} deleteTodo={deleteTodo} toggleTodo={toggleTodo}/>
+      <TodoList todos={todos} deleteTodo={deleteTodo} toggleTodo={toggleTodo} />
     </>
   );
 }
